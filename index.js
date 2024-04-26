@@ -11,12 +11,14 @@ const sleep = (t) => new Promise((resolve) => setTimeout(resolve, t * 1000));
 const port = process.env.PORT || 3000;
 const redisHost = process.env.REDIS_HOST || 'localhost';
 const redisPort = process.env.REDIS_PORT || 6379;
-const redisPassword = process.env.REDIS_PASSWORD|| '';
+const redisUsername = process.env.REDIS_USERNAME || ''; // Add this line
+const redisPassword = process.env.REDIS_PASSWORD || ''; // Add this line
+
 const redisOptions = {
   port: redisPort,
   host: redisHost,
-  password: redisPassword,
-  tls: false,
+  username: redisUsername, // Add this line
+  password: redisPassword
 };
 
 const createQueueMQ = (name) => new QueueMQ(name, { connection: redisOptions });
