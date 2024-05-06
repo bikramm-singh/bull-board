@@ -1,27 +1,22 @@
-require('dotenv').config();
 const { createBullBoard } = require('@bull-board/api');
-
 const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
 const { ExpressAdapter } = require('@bull-board/express');
 const { Queue: QueueMQ, Worker } = require('bullmq');
 const express = require('express');
-
+require('dotenv').config(); 
 const sleep = (t) => new Promise((resolve) => setTimeout(resolve, t * 1000));
-
-const port = process.env.PORT || 3000;
-const redisHost = process.env.REDIS_HOST || 'localhost';
-const redisPort = process.env.REDIS_PORT || 6379;
-const redisUsername = process.env.REDIS_USERNAME || ''; // Add this line
-const redisPassword = process.env.REDIS_PASSWORD || ''; // Add this line
+const redisHost = process.env.REDIS_HOST;
+const redisPort = process.env.REDIS_PORT;
+const redisPassword = process.env.REDIS_PASSWORD;
 
 const redisOptions = {
   port: redisPort,
   host: redisHost,
-  username: redisUsername, // Add this line
-  password: redisPassword
+  password: redisPassword,
+  tls: false,
 };
 
-const createQueueMQ = (name) => new QueueMQ(name, { connection: redisOptions });
+const createQueueMQ = (name) => new QueueMQ(name, redisOptions);
 
 async function setupBullMQProcessor(queueName) {
   new Worker(queueName, async (job) => {
@@ -35,7 +30,7 @@ async function setupBullMQProcessor(queueName) {
 
     return { jobId: `This is the return value of job (${job.id})` };
   }, {
-    connection: redisOptions, // Pass the Redis connection options here
+    connection: redisOptions
   });
 }
 
@@ -64,27 +59,21 @@ const run = async () => {
     }
 
     exampleBullMq.add('Add', { title: req.query.title }, opts);
-console.log(req.query.title);
+
     res.json({
       ok: true,
     });
   });
-    // Endpoint to add a job
-    app.post('/addJob', async (req, res) => {
-        const jobData = req.body;
-        await exampleBullMq.add('jobName', jobData);
-        console.log(req);
-        res.send('Job added to queue');
-      });
-      app.get('/jobs', async (req, res) => {
-        try {
-          const jobs = await exampleBullMq.getJobs();
-          res.json(jobs);
-        } catch (error) {
-          console.error('Error getting jobs:', error);
-          res.status(500).json({ error: 'Internal server error' });
-        }
-      });
+  app.get('/jobs', async (req, res) => {
+    try {
+      const jobs = await exampleBullMq.getJobs();
+      console.log(jobs, "jobs");
+      res.json(jobs);
+    } catch (error) {
+      console.error('Error getting jobs:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 
   app.listen(3000, () => {
     console.log('Running on 3000...');
