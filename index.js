@@ -17,7 +17,7 @@ const redisOptions = {
 };
 
 const createQueueMQ = (name) => new QueueMQ(name, redisOptions);
-
+console.log(redisOptions,"redisOptions");
 async function setupBullMQProcessor(queueName) {
   new Worker(queueName, async (job) => {
     for (let i = 0; i <= 100; i++) {
