@@ -34,24 +34,17 @@ const run = async () => {
     //   password: redisPassword,
     //   tls: tlsEnabled ? { servername: redisHost } : undefined // Include TLS options if enabled
     // });
-    const redisClient = new Redis();
+    const redisClient = new Redis(redisUrl);
 
     redisClient.on('connect', () => {
       console.log('Connected to Redis');
-
-      // Now that we are connected, check the connection status
-      if (redisClient.connected) {
-        console.log('Redis client is connected');
-      } else {
-        console.log('Redis client is not connected');
-      }
     });
 
     redisClient.on('error', (err) => {
       console.error('Redis error:', err);
     });
 
-    const exampleBullMq = new QueueMQ('BullMQ', { connection: redisClient });
+    const exampleBullMq = new QueueMQ('BullMQ', { connection:  redisClient });
 
     const app = express();
 
